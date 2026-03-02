@@ -1,0 +1,17 @@
+{
+  "valid_users": [
+    { "id": 1, "expected_name": "George", "expected_last": "Bluth" },
+    { "id": 2, "expected_name": "Janet", "expected_last": "Weaver" },
+    { "id": 3, "expected_name": "Emma", "expected_last": "Wong" }
+  ],
+  "create_users": [
+    { "name": "Alice Johnson", "job": "QA Engineer" },
+    { "name": "Bob Smith", "job": "DevOps Lead" },
+    { "name": "Carol White", "job": "Backend Developer" }
+  ],
+  "update_user": {
+    "name": "Updated Name",
+    "job": "Senior Automation Engineer"
+  },
+  "invalid_user_id": 9999
+}
