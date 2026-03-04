@@ -1,0 +1,66 @@
+name: API Test Suite
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: "0 6 * * *"   # Daily at 6 AM UTC
+
+jobs:
+  run-api-tests:
+    name: Run Pytest API Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Cache pip dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Create .env file
+        run: |
+          echo "BASE_URL=${{ secrets.BASE_URL || 'https://reqres.in' }}" >> .env
+          echo "API_VERSION=/api" >> .env
+          echo "API_KEY=${{ secrets.API_KEY }}" >> .env
+          echo "EMAIL=${{ secrets.TEST_EMAIL || 'eve.holt@reqres.in' }}" >> .env
+          echo "PASSWORD=${{ secrets.TEST_PASSWORD || 'cityslicka' }}" >> .env
+          echo "REGISTER_EMAIL=eve.holt@reqres.in" >> .env
+          echo "REGISTER_PASSWORD=pistol" >> .env
+
+      - name: Run tests
+        run: |
+          pytest tests/ -v --tb=short --html=reports/report.html --self-contained-html
+
+      - name: Upload HTML Test Report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pytest-html-report
+          path: reports/report.html
+          retention-days: 14
+
+      - name: Upload Logs
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-logs
+          path: reports/*.log
+          retention-days: 7
